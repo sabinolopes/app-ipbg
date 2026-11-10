@@ -1,6 +1,6 @@
-import 'package:app_igreja_guacui/app.dart';
 import 'package:app_igreja_guacui/domains/contacts/contacts_service.dart';
 import 'package:app_igreja_guacui/domains/contacts/types.dart';
+import 'package:app_igreja_guacui/ui/pages/contacts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,18 +13,22 @@ const _pastor = Contact(
   phone: '+55 27 99994-9911',
 );
 
-Future<void> _openApp(
+Future<void> _openPage(
   WidgetTester tester,
   InMemoryContactsRepository repository,
 ) {
   return tester.pumpWidget(
-    App(loadContacts: () => listContacts(repository: repository)),
+    MaterialApp(
+      home: ContactsPage(
+        loadContacts: () => listContacts(repository: repository),
+      ),
+    ),
   );
 }
 
 void main() {
   testWidgets('shows the loading state and then the contacts', (tester) async {
-    await _openApp(tester, InMemoryContactsRepository([_pastor]));
+    await _openPage(tester, InMemoryContactsRepository([_pastor]));
 
     expect(find.bySemanticsLabel('Carregando contatos'), findsOneWidget);
 
@@ -35,7 +39,7 @@ void main() {
   });
 
   testWidgets('tells the user when there are no contacts', (tester) async {
-    await _openApp(tester, InMemoryContactsRepository([]));
+    await _openPage(tester, InMemoryContactsRepository([]));
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum contato cadastrado ainda.'), findsOneWidget);
@@ -43,7 +47,7 @@ void main() {
 
   testWidgets('shows the error and reloads on retry', (tester) async {
     final repository = InMemoryContactsRepository([_pastor])..isOffline = true;
-    await _openApp(tester, repository);
+    await _openPage(tester, repository);
     await tester.pumpAndSettle();
 
     expect(find.text(contactsLoadErrorMessage), findsOneWidget);

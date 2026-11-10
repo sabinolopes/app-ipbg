@@ -36,8 +36,11 @@ Este guia segue a skill `arquitetura-base` (`.claude/skills/arquitetura-base`) e
 
 ## 5. Telas
 
+A navegação entre as seções é uma barra inferior em `lib/ui/pages/home_page.dart`. Só a seção selecionada é construída, então cada visita recarrega os dados.
+
+- **Boletins** (pronta): lista do mais recente para o mais antigo; ao tocar, abre o boletim com o texto e o botão "Abrir PDF", que mostra o PDF num navegador por cima do app.
 - **Contatos** (pronta): pastor, presbíteros e diáconos, nessa ordem, com cargo e telefone.
-- Boletim, agenda, hinário e Bíblia: a implementar, nessa ordem.
+- Agenda, hinário e Bíblia: a implementar, nessa ordem.
 
 ## 6. Padrões de código
 
@@ -76,20 +79,23 @@ O lint (`analysis_options.yaml`) roda com zero avisos. O Dart não tem regra pro
 
 Crie só os papéis que tiverem conteúdo. As implementações reais são escolhidas em `lib/main.dart` e entregues aos serviços.
 
-Domínios: `contacts` (lista de liderança, só leitura).
+Domínios: `bulletins` (boletins semanais, só leitura) e `contacts` (lista de liderança, só leitura).
 
-Pastas sem domínio: `lib/shared/` (result, logger, config) e `lib/providers/` (um cliente externo por pasta).
+Pastas sem domínio: `lib/shared/` (result, logger, config, long_date) e `lib/providers/` (um cliente externo por pasta: `supabase`, `url_launcher`).
+
+**Link vindo do banco só é aberto se for `https`** (`safePdfLink` em `lib/domains/bulletins/types.dart`). Use a mesma regra para qualquer link novo.
 
 ## 8. Interface (`lib/ui/`)
 
 | Camada | Pasta | O que é | Pode importar |
 |---|---|---|---|
-| Elementos | `elements/` | peças genéricas: `MessageWithAction`, `LoadingIndicator` | só Flutter |
-| Blocos | `blocks/<name>/` | uma funcionalidade: `contact_list` | elementos, blocos, tipos dos domínios |
+| Elementos | `elements/` | peças genéricas: `ResultLoader`, `MessageWithAction`, `LoadingIndicator` | Flutter e `lib/shared/` |
+| Blocos | `blocks/<name>/` | uma funcionalidade: `bulletin_list`, `contact_list` | elementos, blocos, tipos dos domínios |
 | Páginas | `pages/` | uma tela inteira com seu estado | elementos, blocos, domínios |
 
 - Cada bloco tem um `index.dart` que exporta o que o resto do app usa; importe por ele.
 - Interface não busca dados: páginas recebem funções de carregamento pelo construtor.
+- Tela que carrega dados usa o `ResultLoader`, que já trata carregamento, erro e "Tentar novamente".
 - Texto e regra de tela vão para função pura com teste (ex.: `roleLabel`).
 - Antes de repetir estilo, procure o elemento.
 
