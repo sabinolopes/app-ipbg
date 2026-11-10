@@ -1,0 +1,23 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+# A checagem roda com --fatal-infos: qualquer aviso bloqueia o commit.
+linter:
+  rules:
+    always_declare_return_types: true
+    always_use_package_imports: true
+    avoid_dynamic_calls: true
+    avoid_positional_boolean_parameters: true
+    avoid_print: true
+    prefer_final_locals: true
+    prefer_single_quotes: true
+    unawaited_futures: true
