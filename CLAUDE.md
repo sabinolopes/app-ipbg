@@ -23,7 +23,8 @@ Este guia segue a skill `arquitetura-base` (`.claude/skills/arquitetura-base`) e
 
 ## 3. Fluxos de negócio importantes
 
-- **Solicitar horário com o pastor** (a implementar): o usuário escolhe um horário livre e informa nome e telefone. Dois pedidos não podem ocupar o mesmo horário, e essa garantia precisa estar no banco, não no app.
+- **Solicitar horário com o pastor:** o usuário escolhe um horário livre e informa nome e telefone. Dois pedidos não podem ocupar o mesmo horário, e quem garante é o banco: o gatilho `appointments_reserve_slot` reserva o horário na mesma transação do pedido e recusa o segundo com `slot_unavailable`. Cancelar ou apagar o pedido libera o horário. Detalhes em `lib/domains/schedule/README.md`.
+- **Nome e telefone de quem pede** nunca vão para log nem para mensagem de erro; o repositório repassa só o código do erro do banco.
 
 ## 4. Modelo de dados (Supabase)
 
@@ -32,15 +33,18 @@ Este guia segue a skill `arquitetura-base` (`.claude/skills/arquitetura-base`) e
 | `contacts` | `id`, `name`, `role` (`pastor`, `elder`, `deacon`), `phone`, `email`, `photo_url`, `created_at` | leitura |
 | `bulletins` | `id`, `title`, `content`, `pdf_url`, `publication_date`, `created_at` | leitura |
 | `schedule_slots` | `id`, `date`, `start_time`, `end_time`, `is_available`, `created_at` | leitura |
-| `appointments` | `id`, `slot_id`, `requester_name`, `requester_phone`, `status` (`pending`, `confirmed`, `cancelled`), `created_at` | só inserção, sem leitura |
+| `appointments` | `id`, `slot_id`, `requester_name` (3 a 80 letras), `requester_phone` (10 ou 11 dígitos), `status` (`pending`, `confirmed`, `cancelled`), `created_at` | só inserção com status `pending`, sem leitura |
+
+As migrações ficam em `supabase/migrations/`.
 
 ## 5. Telas
 
 A navegação entre as seções é uma barra inferior em `lib/ui/pages/home_page.dart`. Só a seção selecionada é construída, então cada visita recarrega os dados.
 
 - **Boletins** (pronta): lista do mais recente para o mais antigo; ao tocar, abre o boletim com o texto e o botão "Abrir PDF", que mostra o PDF num navegador por cima do app.
+- **Agenda** (pronta): horários livres e futuros do pastor; ao tocar, abre o formulário de nome e telefone e envia o pedido.
 - **Contatos** (pronta): pastor, presbíteros e diáconos, nessa ordem, com cargo e telefone.
-- Agenda, hinário e Bíblia: a implementar, nessa ordem.
+- Hinário e Bíblia: a implementar, nessa ordem.
 
 ## 6. Padrões de código
 
@@ -72,14 +76,15 @@ O lint (`analysis_options.yaml`) roda com zero avisos. O Dart não tem regra pro
 | Arquivo | Papel | Regra |
 |---|---|---|
 | `types.dart` | Tipos e funções puras do domínio | sem infraestrutura |
+| `validation.dart` | Limpa e valida o que o usuário digitou | pura, testada; as mesmas regras existem no banco |
 | `<x>_repository.dart` | Interface de acesso a dados | só o contrato |
 | `supabase_<x>_repository.dart` | Implementação real | só traduz dados e lança erro |
 | `<x>_service.dart` | Regras de negócio | dependências por parâmetro, testado em memória |
 | `README.md` | O que o módulo faz e como testar | atualizado junto com o código |
 
-Crie só os papéis que tiverem conteúdo. As implementações reais são escolhidas em `lib/main.dart` e entregues aos serviços.
+Crie só os papéis que tiverem conteúdo. As implementações reais são escolhidas em `lib/main.dart`, reunidas em `AppDependencies` (`lib/app_dependencies.dart`) e entregues às telas.
 
-Domínios: `bulletins` (boletins semanais, só leitura) e `contacts` (lista de liderança, só leitura).
+Domínios: `bulletins` (boletins semanais, só leitura), `contacts` (lista de liderança, só leitura) e `schedule` (horários do pastor e pedido de horário).
 
 Pastas sem domínio: `lib/shared/` (result, logger, config, long_date) e `lib/providers/` (um cliente externo por pasta: `supabase`, `url_launcher`).
 
@@ -90,7 +95,7 @@ Pastas sem domínio: `lib/shared/` (result, logger, config, long_date) e `lib/pr
 | Camada | Pasta | O que é | Pode importar |
 |---|---|---|---|
 | Elementos | `elements/` | peças genéricas: `ResultLoader`, `MessageWithAction`, `LoadingIndicator` | Flutter e `lib/shared/` |
-| Blocos | `blocks/<name>/` | uma funcionalidade: `bulletin_list`, `contact_list` | elementos, blocos, tipos dos domínios |
+| Blocos | `blocks/<name>/` | uma funcionalidade: `appointment_request_form`, `bulletin_list`, `contact_list`, `slot_list` | elementos, blocos, tipos dos domínios |
 | Páginas | `pages/` | uma tela inteira com seu estado | elementos, blocos, domínios |
 
 - Cada bloco tem um `index.dart` que exporta o que o resto do app usa; importe por ele.

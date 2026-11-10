@@ -1,19 +1,13 @@
-import 'package:app_igreja_guacui/ui/pages/bulletin_page.dart';
+import 'package:app_igreja_guacui/app_dependencies.dart';
 import 'package:app_igreja_guacui/ui/pages/bulletins_page.dart';
 import 'package:app_igreja_guacui/ui/pages/contacts_page.dart';
+import 'package:app_igreja_guacui/ui/pages/schedule_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({
-    required this.loadBulletins,
-    required this.loadContacts,
-    required this.openLink,
-    super.key,
-  });
+  const HomePage({required this.dependencies, super.key});
 
-  final LoadBulletins loadBulletins;
-  final LoadContacts loadContacts;
-  final OpenLink openLink;
+  final AppDependencies dependencies;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -30,13 +24,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final dependencies = widget.dependencies;
     // Only the selected section is built, so each visit loads fresh data.
     final sections = [
       BulletinsPage(
-        loadBulletins: widget.loadBulletins,
-        openLink: widget.openLink,
+        loadBulletins: dependencies.loadBulletins,
+        openLink: dependencies.openLink,
       ),
-      ContactsPage(loadContacts: widget.loadContacts),
+      SchedulePage(
+        loadAvailableSlots: dependencies.loadAvailableSlots,
+        requestAppointment: dependencies.requestAppointment,
+      ),
+      ContactsPage(loadContacts: dependencies.loadContacts),
     ];
 
     return Scaffold(
@@ -49,6 +48,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.article_outlined),
             selectedIcon: Icon(Icons.article),
             label: 'Boletins',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_outlined),
+            selectedIcon: Icon(Icons.event),
+            label: 'Agenda',
           ),
           NavigationDestination(
             icon: Icon(Icons.people_outline),

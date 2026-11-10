@@ -1,8 +1,11 @@
 import 'package:app_igreja_guacui/app.dart';
+import 'package:app_igreja_guacui/app_dependencies.dart';
 import 'package:app_igreja_guacui/domains/bulletins/bulletins_service.dart';
 import 'package:app_igreja_guacui/domains/bulletins/supabase_bulletins_repository.dart';
 import 'package:app_igreja_guacui/domains/contacts/contacts_service.dart';
 import 'package:app_igreja_guacui/domains/contacts/supabase_contacts_repository.dart';
+import 'package:app_igreja_guacui/domains/schedule/schedule_service.dart';
+import 'package:app_igreja_guacui/domains/schedule/supabase_schedule_repository.dart';
 import 'package:app_igreja_guacui/providers/supabase/supabase_client.dart';
 import 'package:app_igreja_guacui/providers/url_launcher/open_link.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +18,21 @@ Future<void> main() async {
   final supabaseClient = await initializeSupabase();
   final bulletinsRepository = SupabaseBulletinsRepository(supabaseClient);
   final contactsRepository = SupabaseContactsRepository(supabaseClient);
+  final scheduleRepository = SupabaseScheduleRepository(supabaseClient);
 
   runApp(
     App(
-      loadBulletins: () => listBulletins(repository: bulletinsRepository),
-      loadContacts: () => listContacts(repository: contactsRepository),
-      openLink: openLinkInApp,
+      dependencies: AppDependencies(
+        loadBulletins: () => listBulletins(repository: bulletinsRepository),
+        loadContacts: () => listContacts(repository: contactsRepository),
+        loadAvailableSlots: () => listAvailableSlots(
+          repository: scheduleRepository,
+          now: DateTime.now(),
+        ),
+        requestAppointment: (form) =>
+            requestAppointment(repository: scheduleRepository, form: form),
+        openLink: openLinkInApp,
+      ),
     ),
   );
 }
