@@ -2,8 +2,6 @@ import 'package:app_igreja_guacui/domains/contacts/types.dart';
 import 'package:app_igreja_guacui/ui/blocks/contact_list/role_label.dart';
 import 'package:flutter/material.dart';
 
-const _detailsSeparator = ' · ';
-
 class ContactList extends StatelessWidget {
   const ContactList({required this.contacts, super.key});
 
@@ -30,14 +28,21 @@ class _ContactItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final phone = contact.phone;
+
     return ListTile(
       leading: const CircleAvatar(child: Icon(Icons.person)),
       title: Text(contact.name),
-      subtitle: Text(contactDetails(contact)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [Text(roleDescription(contact)), ?_phoneText(phone)],
+      ),
     );
   }
-}
 
-String contactDetails(Contact contact) {
-  return [roleLabel(contact.role), ?contact.phone].join(_detailsSeparator);
+  Widget? _phoneText(String? phone) {
+    if (phone == null) return null;
+
+    return Text(phone);
+  }
 }

@@ -30,7 +30,7 @@ Este guia segue a skill `arquitetura-base` (`.claude/skills/arquitetura-base`) e
 
 | Tabela | Campos | Acesso público |
 |---|---|---|
-| `contacts` | `id`, `name`, `role` (`pastor`, `elder`, `deacon`), `phone`, `email`, `photo_url`, `created_at` | leitura |
+| `contacts` | `id`, `name`, `role` (`pastor`, `elder`, `deacon`), `board_position` (`president`, `vice_president`, `first_secretary`, `second_secretary` ou vazio), `phone`, `email`, `photo_url`, `created_at` | leitura |
 | `bulletins` | `id`, `title`, `content`, `pdf_url`, `publication_date`, `created_at` | leitura |
 | `schedule_slots` | `id`, `date`, `start_time`, `end_time`, `is_available`, `created_at` | leitura |
 | `appointments` | `id`, `slot_id`, `requester_name` (3 a 80 letras), `requester_phone` (10 ou 11 dígitos), `status` (`pending`, `confirmed`, `cancelled`), `created_at` | só inserção com status `pending`, sem leitura |
@@ -43,7 +43,7 @@ A navegação entre as seções é uma barra inferior em `lib/ui/pages/home_page
 
 - **Boletins** (pronta): lista do mais recente para o mais antigo; ao tocar, abre o boletim com o texto e o botão "Abrir PDF", que mostra o PDF num navegador por cima do app.
 - **Agenda** (pronta): horários livres e futuros do pastor; ao tocar, abre o formulário de nome e telefone e envia o pedido.
-- **Contatos** (pronta): pastor, presbíteros e diáconos, nessa ordem, com cargo e telefone.
+- **Contatos** (pronta): pastor, presbíteros e diáconos, nessa ordem, com cargo, posição no Conselho ou na Junta Diaconal e telefone.
 - Hinário e Bíblia: a implementar, nessa ordem.
 
 ## 6. Padrões de código

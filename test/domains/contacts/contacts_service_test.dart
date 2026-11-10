@@ -5,8 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/in_memory_contacts_repository.dart';
 
-Contact _contact(String name, Role role) {
-  return Contact(id: name, name: name, role: role);
+Contact _contact(String name, Role role, {BoardPosition? boardPosition}) {
+  return Contact(
+    id: name,
+    name: name,
+    role: role,
+    boardPosition: boardPosition,
+  );
 }
 
 Iterable<String> _names(Result<List<Contact>> result) {
@@ -36,6 +41,27 @@ void main() {
     final result = await listContacts(repository: repository);
 
     expect(_names(result), ['Abel', 'Paulo', 'reinaldo']);
+  });
+
+  test('lists board members by position before the other members', () async {
+    final repository = InMemoryContactsRepository([
+      _contact('Abel', Role.deacon),
+      _contact(
+        'Marco',
+        Role.deacon,
+        boardPosition: BoardPosition.secondSecretary,
+      ),
+      _contact('Saulo', Role.deacon, boardPosition: BoardPosition.president),
+      _contact(
+        'Rogerr',
+        Role.deacon,
+        boardPosition: BoardPosition.vicePresident,
+      ),
+    ]);
+
+    final result = await listContacts(repository: repository);
+
+    expect(_names(result), ['Saulo', 'Rogerr', 'Marco', 'Abel']);
   });
 
   test(

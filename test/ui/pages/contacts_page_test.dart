@@ -10,6 +10,7 @@ const _pastor = Contact(
   id: '1',
   name: 'Rinaldo Berbert',
   role: Role.pastor,
+  boardPosition: BoardPosition.president,
   phone: '+55 27 99994-9911',
 );
 
@@ -35,7 +36,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Rinaldo Berbert'), findsOneWidget);
-    expect(find.text('Pastor · +55 27 99994-9911'), findsOneWidget);
+    expect(find.text('Pastor · Presidente do Conselho'), findsOneWidget);
+    expect(find.text('+55 27 99994-9911'), findsOneWidget);
   });
 
   testWidgets('tells the user when there are no contacts', (tester) async {

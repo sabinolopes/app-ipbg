@@ -2,11 +2,12 @@ import 'package:app_igreja_guacui/domains/contacts/supabase_contacts_repository.
 import 'package:app_igreja_guacui/domains/contacts/types.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, dynamic> _row({required String role}) {
+Map<String, dynamic> _row({required String role, String? boardPosition}) {
   return {
     'id': 'a1',
     'name': 'Reinaldo',
     'role': role,
+    'board_position': boardPosition,
     'phone': '+55 28 98802-8801',
     'email': null,
     'photo_url': null,
@@ -20,6 +21,7 @@ void main() {
     expect(contact.id, 'a1');
     expect(contact.name, 'Reinaldo');
     expect(contact.role, Role.elder);
+    expect(contact.boardPosition, isNull);
     expect(contact.phone, '+55 28 98802-8801');
     expect(contact.email, isNull);
   });
@@ -29,7 +31,26 @@ void main() {
     expect(contactFromRow(_row(role: 'deacon')).role, Role.deacon);
   });
 
+  test('translates every board position stored in the database', () {
+    BoardPosition? positionOf(String value) {
+      return contactFromRow(_row(role: 'elder', boardPosition: value))
+          .boardPosition;
+    }
+
+    expect(positionOf('president'), BoardPosition.president);
+    expect(positionOf('vice_president'), BoardPosition.vicePresident);
+    expect(positionOf('first_secretary'), BoardPosition.firstSecretary);
+    expect(positionOf('second_secretary'), BoardPosition.secondSecretary);
+  });
+
   test('rejects a role the app does not know', () {
     expect(() => contactFromRow(_row(role: 'bishop')), throwsFormatException);
+  });
+
+  test('rejects a board position the app does not know', () {
+    expect(
+      () => contactFromRow(_row(role: 'elder', boardPosition: 'treasurer')),
+      throwsFormatException,
+    );
   });
 }
